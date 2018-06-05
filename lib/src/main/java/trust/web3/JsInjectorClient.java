@@ -19,7 +19,6 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import trust.R;
 import trust.core.entity.Address;
 
 class JsInjectorClient {

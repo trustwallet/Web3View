@@ -132,62 +132,41 @@ public class Web3View extends WebView {
     }
 
     public void onSignTransactionSuccessful(Transaction transaction, String signHex) {
-        int callbackId = 8888;
-        if (transaction instanceof Web3Transaction) {
-            callbackId = ((Web3Transaction) transaction).callbackId;
-        }
+        long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
     public void onSignMessageSuccessful(Message message, String signHex) {
-        int callbackId = 8888;
-        if (message instanceof Web3Message) {
-            callbackId = ((Web3Message) message).callbackId;
-        }
+        long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
     public void onSignPersonalMessageSuccessful(Message message, String signHex) {
-        int callbackId = 8888;
-        if (message instanceof Web3Message) {
-            callbackId = ((Web3Message) message).callbackId;
-        }
+        long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
     public void onSignError(Transaction transaction, String error) {
-        int callbackId = 8888;
-        if (transaction instanceof Web3Transaction) {
-            callbackId = ((Web3Transaction) transaction).callbackId;
-        }
+        long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
     public void onSignError(Message message, String error) {
-        int callbackId = 8888;
-        if (message instanceof Web3Message) {
-            callbackId = ((Web3Message) message).callbackId;
-        }
+        long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
     public void onSignCancel(Transaction transaction) {
-        int callbackId = 8888;
-        if (transaction instanceof Web3Transaction) {
-            callbackId = ((Web3Transaction) transaction).callbackId;
-        }
+        long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
     public void onSignCancel(Message message) {
-        int callbackId = 8888;
-        if (message instanceof Web3Message) {
-            callbackId = ((Web3Message) message).callbackId;
-        }
+        long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
-    private void callbackToJS(int callbackId, String function, String param) {
+    private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
         post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
     }

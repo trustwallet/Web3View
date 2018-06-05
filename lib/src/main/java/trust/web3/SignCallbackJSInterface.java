@@ -7,6 +7,7 @@ import android.webkit.JavascriptInterface;
 import java.math.BigInteger;
 
 import trust.core.entity.Address;
+import trust.core.entity.Message;
 import trust.core.entity.Transaction;
 import trust.core.util.Hex;
 
@@ -37,25 +38,26 @@ public class SignCallbackJSInterface {
             String gasLimit,
             String gasPrice,
             String payload) {
-        Transaction transaction = new Web3Transaction(
-                callbackId,
+        Transaction transaction = new Transaction(
                 TextUtils.isEmpty(recipient) ? Address.EMPTY : new Address(recipient),
+                null,
                 Hex.hexToBigInteger(value),
                 Hex.hexToBigInteger(gasLimit, BigInteger.ZERO),
                 Hex.hexToLong(gasPrice, 0),
                 Hex.hexToLong(nonce, -1),
-                payload);
+                payload,
+                callbackId);
         onSignTransactionListener.onSignTransaction(transaction);
 
     }
 
     @JavascriptInterface
     public void signMessage(int callbackId, String data) {
-        onSignMessageListener.onSignMessage(new Web3Message(callbackId, data));
+        onSignMessageListener.onSignMessage(new Message(data, false, callbackId));
     }
 
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
-        onSignPersonalMessageListener.onSignPersonalMessage(new Web3Message(callbackId, data));
+        onSignPersonalMessageListener.onSignPersonalMessage(new Message(data, true, callbackId));
     }
 }
