@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import trust.core.entity.Address;
 import trust.web3.OnSignMessageListener;
 import trust.web3.OnSignPersonalMessageListener;
 import trust.web3.OnSignTransactionListener;
@@ -26,14 +27,28 @@ public class MainActivity extends AppCompatActivity implements
 
         url = findViewById(R.id.url);
         web3 = findViewById(R.id.web3view);
-        web3.setOnSignMessageListener(this);
-        web3.setOnSignPersonalMessageListener(this);
-        web3.setOnSignTransactionListener(this);
-        findViewById(R.id.go).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                web3.loadUrl(url.getText().toString());
-            }
+        findViewById(R.id.go).setOnClickListener(v -> web3.loadUrl(url.getText().toString()));
+
+        setupWeb3();
+
+    }
+
+    private void setupWeb3() {
+        web3.setChainId(1);
+        web3.setRpcUrl("https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk");
+        web3.setWalletAddress(new Address("0xaa3cc54d7f10fa3a1737e4997ba27c34f330ce16"));
+
+        web3.setOnSignMessageListener(message -> {
+            Toast.makeText(this, "Message: " + message.value, Toast.LENGTH_LONG).show();
+            web3.onSignCancel(message);
+        });
+        web3.setOnSignPersonalMessageListener(message -> {
+            Toast.makeText(this, "Personal message: " + message.value, Toast.LENGTH_LONG).show();
+            web3.onSignCancel(message);
+        });
+        web3.setOnSignTransactionListener(transaction -> {
+            Toast.makeText(this, "Transaction: " + transaction.value, Toast.LENGTH_LONG).show();
+            web3.onSignCancel(transaction);
         });
     }
 
