@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.TrustWallet:TrustSdk-android:0.01.2'
+    implementation 'com.github.TrustWallet:TrustSdk-android:0.01.3'
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'

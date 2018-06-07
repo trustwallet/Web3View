@@ -2,7 +2,6 @@ package trust.web3view;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,7 +23,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private TextView url;
     private Web3View web3;
-    private Call call;
+    private Call<SignMessageRequest> callSignMessage;
+    private Call<SignMessageRequest> callSignPersonalMessage;
+    private Call<SignTransactionRequest> callSignTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +37,6 @@ public class MainActivity extends AppCompatActivity implements
         findViewById(R.id.go).setOnClickListener(v -> web3.loadUrl(url.getText().toString()));
 
         setupWeb3();
-
-        if (savedInstanceState != null && savedInstanceState.containsKey("sign_call")) {
-            call = savedInstanceState.getParcelable("sign_call");
-        }
     }
 
     private void setupWeb3() {
@@ -48,11 +45,11 @@ public class MainActivity extends AppCompatActivity implements
         web3.setWalletAddress(new Address("0xaa3cc54d7f10fa3a1737e4997ba27c34f330ce16"));
 
         web3.setOnSignMessageListener(message ->
-                call = Trust.signMessage().message(message).call(this));
+                callSignMessage = Trust.signMessage().message(message).call(this));
         web3.setOnSignPersonalMessageListener(message ->
-                call = Trust.signMessage().message(message).call(this));
+                callSignPersonalMessage = Trust.signMessage().message(message).call(this));
         web3.setOnSignTransactionListener(transaction ->
-                call = Trust.signTransaction().transaction(transaction).call(this));
+                callSignTransaction = Trust.signTransaction().transaction(transaction).call(this));
     }
 
     @Override
@@ -85,43 +82,49 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (call != null) {
-            call.onActivityResult(requestCode, resultCode, data).subscribe((request, signHex) -> {
-                if (request instanceof SignMessageRequest) {
-                    SignMessageRequest signMessageRequest = (SignMessageRequest) request;
-                    Message message = signMessageRequest.body();
-                    if (message.isPersonal) {
-                        web3.onSignPersonalMessageSuccessful(message, signHex);
+        if (callSignTransaction != null) {
+            callSignTransaction.onActivityResult(requestCode, resultCode, data, response -> {
+                Transaction transaction = response.request.body();
+                if (response.isSuccess()) {
+                    web3.onSignTransactionSuccessful(transaction, response.result);
+                } else {
+                    if (response.error == Trust.ErrorCode.CANCELED) {
+                        web3.onSignCancel(transaction);
                     } else {
-                        web3.onSignMessageSuccessful(message, signHex);
-                    }
-                } else if (request instanceof SignTransactionRequest) {
-                    web3.onSignTransactionSuccessful(((SignTransactionRequest) request).body(), signHex);
-                }
-            }, (request, error) -> {
-                switch (error) {
-                    case Trust.ErrorCode.CANCELED: {
-                        if (request instanceof SignMessageRequest) {
-                            web3.onSignCancel((Message) request.body());
-                        } else if (request instanceof SignTransactionRequest) {
-                            web3.onSignCancel((Transaction) request.body());
-                        }
-                    } break;
-                    default: {
-                        if (request instanceof SignMessageRequest) {
-                            web3.onSignError((Message) request.body(), "Some error");
-                        } else if (request instanceof SignTransactionRequest) {
-                            web3.onSignError((Transaction) request.body(), "Some error");
-                        }
+                        web3.onSignError(transaction, "Some error");
                     }
                 }
             });
         }
-    }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        outState.putParcelable("sign_call", call);
+        if (callSignMessage != null) {
+            callSignMessage.onActivityResult(requestCode, resultCode, data, response -> {
+                Message message = response.request.body();
+                if (response.isSuccess()) {
+                    web3.onSignMessageSuccessful(message, response.result);
+                } else {
+                    if (response.error == Trust.ErrorCode.CANCELED) {
+                        web3.onSignCancel(message);
+                    } else {
+                        web3.onSignError(message, "Some error");
+                    }
+                }
+            });
+        }
+
+        if (callSignPersonalMessage != null) {
+            callSignPersonalMessage.onActivityResult(requestCode, resultCode, data, response -> {
+                Message message = response.request.body();
+                if (response.isSuccess()) {
+                    web3.onSignMessageSuccessful(message, response.result);
+                } else {
+                    if (response.error == Trust.ErrorCode.CANCELED) {
+                        web3.onSignCancel(message);
+                    } else {
+                        web3.onSignError(message, "Some error");
+                    }
+                }
+            });
+        }
     }
 }
