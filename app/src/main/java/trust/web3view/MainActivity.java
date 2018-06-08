@@ -3,6 +3,7 @@ package trust.web3view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,15 +35,19 @@ public class MainActivity extends AppCompatActivity implements
 
         url = findViewById(R.id.url);
         web3 = findViewById(R.id.web3view);
-        findViewById(R.id.go).setOnClickListener(v -> web3.loadUrl(url.getText().toString()));
+        findViewById(R.id.go).setOnClickListener(v -> {
+            web3.loadUrl(url.getText().toString());
+            web3.requestFocus();
+        });
 
         setupWeb3();
     }
 
     private void setupWeb3() {
-        web3.setChainId(1);
-        web3.setRpcUrl("https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk");
-        web3.setWalletAddress(new Address("0xaa3cc54d7f10fa3a1737e4997ba27c34f330ce16"));
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        web3.setChainId(3);
+        web3.setRpcUrl("https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk");
+        web3.setWalletAddress(new Address("0x242776e7ca6271e416e737adffcfeb22e8dc1b3c"));
 
         web3.setOnSignMessageListener(message ->
                 callSignMessage = Trust.signMessage().message(message).call(this));

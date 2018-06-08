@@ -6,7 +6,8 @@
     >
     <EditText
         android:id="@+id/url"
-        android:inputType="textWebEditText"
+        android:inputType="textUri"
+        android:text="https://ropsten.kyber.network"
         android:layout_toStartOf="@+id/go"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
