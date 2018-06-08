@@ -42,8 +42,8 @@ public class SignCallbackJSInterface {
                 TextUtils.isEmpty(recipient) ? Address.EMPTY : new Address(recipient),
                 null,
                 Hex.hexToBigInteger(value),
-                Hex.hexToBigInteger(gasLimit, BigInteger.ZERO),
-                Hex.hexToLong(gasPrice, 0),
+                Hex.hexToBigInteger(gasPrice, BigInteger.ZERO),
+                Hex.hexToLong(gasLimit, 0),
                 Hex.hexToLong(nonce, -1),
                 payload,
                 callbackId);

@@ -75,7 +75,8 @@ public class Web3View extends WebView {
         addJavascriptInterface(new SignCallbackJSInterface(
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
-                innerOnSignPersonalMessageListener), "web3ViewCallback");
+                innerOnSignPersonalMessageListener), "trust");
+
         super.setWebViewClient(webViewClient);
     }
 
