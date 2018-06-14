@@ -107,7 +107,7 @@ public class Web3ViewClient extends WebViewClient {
         } catch (Exception ex) {
             return null;
         }
-        if (response.isRedirect) {
+        if (response == null || response.isRedirect) {
             return null;
         } else {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(response.data.getBytes());
