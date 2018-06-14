@@ -56,7 +56,7 @@ web3.setOnSignPersonalMessageListener(message -> {
 });
 web3.setOnSignTransactionListener(transaction -> {
     Toast.makeText(this, "Transaction: " + transaction.value, Toast.LENGTH_LONG).show();
-    web3.onSignCancel(message);
+    web3.onSignCancel(transaction);
 });
 ```
 Send results:
