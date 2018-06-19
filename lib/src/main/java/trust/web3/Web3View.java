@@ -22,6 +22,7 @@ import java.io.InputStream;
 import trust.core.entity.Address;
 import trust.core.entity.Message;
 import trust.core.entity.Transaction;
+import trust.core.entity.TypedData;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
@@ -33,6 +34,8 @@ public class Web3View extends WebView {
     private OnSignMessageListener onSignMessageListener;
     @Nullable
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
+    @Nullable
+    private OnSignTypedMessageListener onSignTypedMessageListener;
     private JsInjectorClient jsInjectorClient;
     private Web3ViewClient webViewClient;
 
@@ -73,9 +76,11 @@ public class Web3View extends WebView {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setDomStorageEnabled(true);
         addJavascriptInterface(new SignCallbackJSInterface(
+                this,
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
-                innerOnSignPersonalMessageListener), "trust");
+                innerOnSignPersonalMessageListener,
+                innerOnSignTypedMessageListener), "trust");
 
         super.setWebViewClient(webViewClient);
     }
@@ -130,6 +135,10 @@ public class Web3View extends WebView {
 
     public void setOnSignPersonalMessageListener(@Nullable OnSignPersonalMessageListener onSignPersonalMessageListener) {
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
+    }
+    
+    public void setOnSignTypedMessageListener(@Nullable OnSignTypedMessageListener onSignTypedMessageListener) {
+        this.onSignTypedMessageListener = onSignTypedMessageListener;
     }
 
     public void onSignTransactionSuccessful(Transaction transaction, String signHex) {
@@ -194,6 +203,13 @@ public class Web3View extends WebView {
         @Override
         public void onSignPersonalMessage(Message message) {
             onSignPersonalMessageListener.onSignPersonalMessage(message);
+        }
+    };
+
+    private final OnSignTypedMessageListener innerOnSignTypedMessageListener = new OnSignTypedMessageListener() {
+        @Override
+        public void onSignTypedMessage(Message<TypedData[]> message) {
+            onSignTypedMessageListener.onSignTypedMessage(message);
         }
     };
 

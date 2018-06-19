@@ -7,7 +7,7 @@
     <EditText
         android:id="@+id/url"
         android:inputType="textUri"
-        android:text="https://ropsten.kyber.network"
+        android:text="https://danfinlay.github.io/js-eth-personal-sign-examples/"
         android:layout_toStartOf="@+id/go"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

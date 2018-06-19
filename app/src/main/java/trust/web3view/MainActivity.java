@@ -7,25 +7,32 @@ import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import trust.Call;
 import trust.SignMessageRequest;
+import trust.SignPersonalMessageRequest;
 import trust.SignTransactionRequest;
+import trust.SignTypedMessageRequest;
 import trust.Trust;
 import trust.core.entity.Address;
 import trust.core.entity.Message;
 import trust.core.entity.Transaction;
+import trust.core.entity.TypedData;
 import trust.web3.OnSignMessageListener;
 import trust.web3.OnSignPersonalMessageListener;
 import trust.web3.OnSignTransactionListener;
+import trust.web3.OnSignTypedMessageListener;
 import trust.web3.Web3View;
 
 public class MainActivity extends AppCompatActivity implements
-        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignMessageListener {
+        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener {
 
     private TextView url;
     private Web3View web3;
     private Call<SignMessageRequest> callSignMessage;
-    private Call<SignMessageRequest> callSignPersonalMessage;
+    private Call<SignPersonalMessageRequest> callSignPersonalMessage;
+    private Call<SignTypedMessageRequest> callSignTypedMessage;
     private Call<SignTransactionRequest> callSignTransaction;
 
     @Override
@@ -45,27 +52,35 @@ public class MainActivity extends AppCompatActivity implements
 
     private void setupWeb3() {
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
-        web3.setChainId(3);
-        web3.setRpcUrl("https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk");
+        web3.setChainId(1);
+        web3.setRpcUrl("https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk");
         web3.setWalletAddress(new Address("0x242776e7ca6271e416e737adffcfeb22e8dc1b3c"));
 
         web3.setOnSignMessageListener(message ->
                 callSignMessage = Trust.signMessage().message(message).call(this));
         web3.setOnSignPersonalMessageListener(message ->
-                callSignPersonalMessage = Trust.signMessage().message(message).call(this));
+                callSignPersonalMessage = Trust.signPersonalMessage().message(message).call(this));
         web3.setOnSignTransactionListener(transaction ->
                 callSignTransaction = Trust.signTransaction().transaction(transaction).call(this));
+        web3.setOnSignTypedMessageListener(message ->
+                callSignTypedMessage = Trust.signTypedMessage().message(message).call(this));
     }
 
     @Override
-    public void onSignMessage(Message message) {
+    public void onSignMessage(Message<String> message) {
         Toast.makeText(this, message.value, Toast.LENGTH_LONG).show();
         web3.onSignCancel(message);
     }
 
     @Override
-    public void onSignPersonalMessage(Message message) {
+    public void onSignPersonalMessage(Message<String> message) {
         Toast.makeText(this, message.value, Toast.LENGTH_LONG).show();
+        web3.onSignCancel(message);
+    }
+
+    @Override
+    public void onSignTypedMessage(Message<TypedData[]> message) {
+        Toast.makeText(this, new Gson().toJson(message), Toast.LENGTH_LONG).show();
         web3.onSignCancel(message);
     }
 
@@ -119,6 +134,21 @@ public class MainActivity extends AppCompatActivity implements
 
         if (callSignPersonalMessage != null) {
             callSignPersonalMessage.onActivityResult(requestCode, resultCode, data, response -> {
+                Message message = response.request.body();
+                if (response.isSuccess()) {
+                    web3.onSignMessageSuccessful(message, response.result);
+                } else {
+                    if (response.error == Trust.ErrorCode.CANCELED) {
+                        web3.onSignCancel(message);
+                    } else {
+                        web3.onSignError(message, "Some error");
+                    }
+                }
+            });
+        }
+
+        if (callSignTypedMessage != null) {
+            callSignTypedMessage.onActivityResult(requestCode, resultCode, data, response -> {
                 Message message = response.request.body();
                 if (response.isSuccess()) {
                     web3.onSignMessageSuccessful(message, response.result);
